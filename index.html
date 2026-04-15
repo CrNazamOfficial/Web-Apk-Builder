@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Builder APK — Zam Coder</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #080808;
+    --white: #f5f5f5;
+    --silver: #c0c0c0;
+    --gray-dark: #1a1a1a;
+    --gray-mid: #2e2e2e;
+    --gray-light: #4a4a4a;
+    --border: rgba(192,192,192,0.15);
+    --accent: #c0c0c0;
+    --glow: rgba(192,192,192,0.08);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* NOISE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* HEADER */
+  header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 40px;
+    background: rgba(8,8,8,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.15rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-dot {
+    width: 8px; height: 8px;
+    background: var(--silver);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  .badge {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--silver);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* HERO */
+  .hero {
+    padding: 160px 40px 80px;
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-tag {
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    color: var(--silver);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .hero-tag::before {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 1px;
+    background: var(--silver);
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.8rem, 7vw, 5.5rem);
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    color: var(--white);
+    margin-bottom: 20px;
+  }
+
+  h1 span {
+    color: transparent;
+    -webkit-text-stroke: 1px var(--silver);
+  }
+
+  .hero-sub {
+    font-size: 0.8rem;
+    color: var(--gray-light);
+    letter-spacing: 0.05em;
+    max-width: 480px;
+    line-height: 1.8;
+  }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--silver), transparent);
+    opacity: 0.2;
+    margin: 0 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* MAIN FORM CONTAINER */
+  .builder {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 60px 40px 100px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--silver);
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* GRID */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+
+  .grid-1 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+
+  /* FIELD */
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  label {
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--silver);
+  }
+
+  input[type="text"],
+  input[type="url"],
+  input[type="color"] {
+    background: var(--gray-dark);
+    border: 1px solid var(--border);
+    color: var(--white);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    padding: 14px 16px;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+    width: 100%;
+  }
+
+  input[type="text"]:focus,
+  input[type="url"]:focus {
+    border-color: rgba(192,192,192,0.5);
+    background: #1f1f1f;
+  }
+
+  input::placeholder { color: var(--gray-light); }
+
+  /* SOURCE TOGGLE */
+  .source-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+
+  .toggle-btn {
+    padding: 14px;
+    background: transparent;
+    border: none;
+    color: var(--gray-light);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    position: relative;
+  }
+
+  .toggle-btn.active {
+    background: var(--gray-mid);
+    color: var(--white);
+  }
+
+  .toggle-btn:first-child { border-right: 1px solid var(--border); }
+
+  /* SOURCE PANELS */
+  .source-panel { display: none; }
+  .source-panel.active { display: block; }
+
+  /* FILE UPLOAD */
+  .file-drop {
+    border: 1px dashed rgba(192,192,192,0.25);
+    background: var(--gray-dark);
+    padding: 36px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .file-drop:hover {
+    border-color: rgba(192,192,192,0.5);
+    background: #1f1f1f;
+  }
+
+  .file-drop input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .file-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .file-drop-text {
+    font-size: 0.72rem;
+    color: var(--silver);
+    letter-spacing: 0.1em;
+  }
+
+  .file-drop-text span {
+    color: var(--gray-light);
+    display: block;
+    margin-top: 4px;
+    font-size: 0.65rem;
+  }
+
+  .file-name {
+    margin-top: 10px;
+    font-size: 0.7rem;
+    color: var(--white);
+    display: none;
+  }
+
+  /* ICON SECTION */
+  .icon-section {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+    align-items: start;
+  }
+
+  .icon-preview-box {
+    background: var(--gray-dark);
+    border: 1px solid var(--border);
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .icon-preview-box img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: none;
+  }
+
+  .icon-placeholder {
+    font-size: 0.65rem;
+    color: var(--gray-light);
+    letter-spacing: 0.1em;
+    text-align: center;
+  }
+
+  .icon-controls { display: flex; flex-direction: column; gap: 16px; }
+
+  /* SHAPE TOGGLE */
+  .shape-toggle {
+    display: flex;
+    gap: 12px;
+  }
+
+  .shape-btn {
+    width: 48px; height: 48px;
+    background: var(--gray-dark);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    color: var(--silver);
+  }
+
+  .shape-btn.active {
+    background: var(--gray-mid);
+    border-color: var(--silver);
+  }
+
+  .shape-btn svg { width: 22px; height: 22px; fill: currentColor; }
+
+  /* ZOOM SLIDER */
+  .zoom-wrap { display: flex; flex-direction: column; gap: 8px; }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 2px;
+    background: var(--gray-mid);
+    outline: none;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    background: var(--silver);
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .zoom-val {
+    font-size: 0.65rem;
+    color: var(--silver);
+    text-align: right;
+  }
+
+  /* CROP BUTTON */
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--silver);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    padding: 11px 18px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-secondary:hover {
+    background: var(--gray-mid);
+    border-color: var(--silver);
+    color: var(--white);
+  }
+
+  /* SPLASH COLOR */
+  .splash-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--gray-dark);
+    border: 1px solid var(--border);
+    padding: 12px 16px;
+  }
+
+  .splash-preview {
+    width: 40px; height: 40px;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .splash-hex {
+    font-size: 0.8rem;
+    color: var(--white);
+    letter-spacing: 0.1em;
+    flex: 1;
+  }
+
+  input[type="color"] {
+    width: 36px; height: 36px;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    opacity: 0;
+    position: absolute;
+  }
+
+  .color-trigger {
+    position: relative;
+    width: 36px; height: 36px;
+    flex-shrink: 0;
+  }
+
+  .color-trigger-icon {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    pointer-events: none;
+  }
+
+  /* SETTINGS PANEL */
+  .settings-panel {
+    background: var(--gray-dark);
+    border: 1px solid var(--border);
+    padding: 28px;
+    margin-bottom: 32px;
+  }
+
+  .settings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .settings-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .settings-item:last-child { border-bottom: none; }
+
+  .settings-item-label {
+    font-size: 0.7rem;
+    color: var(--silver);
+    letter-spacing: 0.1em;
+  }
+
+  .toggle-switch {
+    width: 40px; height: 22px;
+    background: var(--gray-mid);
+    border-radius: 11px;
+    position: relative;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    transition: background 0.2s;
+  }
+
+  .toggle-switch.on { background: #3a3a3a; }
+
+  .toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 16px; height: 16px;
+    background: var(--gray-light);
+    border-radius: 50%;
+    transition: transform 0.2s, background 0.2s;
+  }
+
+  .toggle-switch.on::after {
+    transform: translateX(18px);
+    background: var(--silver);
+  }
+
+  /* BUILD BUTTON */
+  .build-btn {
+    width: 100%;
+    padding: 22px;
+    background: var(--white);
+    color: var(--black);
+    border: none;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.25s;
+  }
+
+  .build-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.1) 50%, transparent 100%);
+    transform: translateX(-100%);
+    transition: transform 0.5s;
+  }
+
+  .build-btn:hover { background: var(--silver); }
+  .build-btn:hover::before { transform: translateX(100%); }
+
+  .build-btn:active { transform: scale(0.99); }
+
+  /* PROGRESS */
+  .progress-wrap {
+    display: none;
+    margin-top: 20px;
+  }
+
+  .progress-bar {
+    height: 2px;
+    background: var(--gray-mid);
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--silver);
+    width: 0%;
+    transition: width 0.3s;
+  }
+
+  .progress-text {
+    font-size: 0.65rem;
+    color: var(--silver);
+    letter-spacing: 0.15em;
+    margin-top: 10px;
+    text-align: center;
+  }
+
+  /* CROP MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.9);
+    z-index: 999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--gray-dark);
+    border: 1px solid var(--border);
+    padding: 32px;
+    max-width: 520px;
+    width: 90%;
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .modal-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .modal-close {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--silver);
+    width: 32px; height: 32px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .modal-close:hover { background: var(--gray-mid); color: var(--white); }
+
+  .crop-canvas-wrap {
+    background: #111;
+    border: 1px solid var(--border);
+    aspect-ratio: 1;
+    max-height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 20px;
+  }
+
+  #cropCanvas {
+    max-width: 100%;
+    max-height: 100%;
+    cursor: move;
+  }
+
+  .modal-actions { display: flex; gap: 12px; }
+
+  .btn-primary {
+    flex: 1;
+    padding: 13px;
+    background: var(--white);
+    color: var(--black);
+    border: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .btn-primary:hover { background: var(--silver); }
+
+  /* AUDIO PLAYER */
+  .audio-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(8,8,8,0.95);
+    border-top: 1px solid var(--border);
+    padding: 12px 40px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    backdrop-filter: blur(20px);
+  }
+
+  .audio-icon {
+    width: 32px; height: 32px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  .audio-icon:hover { background: var(--gray-mid); }
+
+  .audio-icon svg { width: 14px; height: 14px; fill: var(--silver); }
+
+  .audio-wave {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    flex-shrink: 0;
+  }
+
+  .wave-bar {
+    width: 3px;
+    background: var(--silver);
+    border-radius: 2px;
+    animation: wave 1.2s infinite ease-in-out;
+  }
+
+  .wave-bar:nth-child(1) { height: 8px; animation-delay: 0s; }
+  .wave-bar:nth-child(2) { height: 14px; animation-delay: 0.15s; }
+  .wave-bar:nth-child(3) { height: 10px; animation-delay: 0.3s; }
+  .wave-bar:nth-child(4) { height: 16px; animation-delay: 0.45s; }
+  .wave-bar:nth-child(5) { height: 8px; animation-delay: 0.6s; }
+
+  @keyframes wave {
+    0%, 100% { transform: scaleY(0.5); }
+    50% { transform: scaleY(1.2); }
+  }
+
+  .audio-info { flex: 1; overflow: hidden; }
+
+  .audio-title {
+    font-size: 0.68rem;
+    color: var(--white);
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .audio-sub {
+    font-size: 0.58rem;
+    color: var(--gray-light);
+    letter-spacing: 0.1em;
+    margin-top: 2px;
+  }
+
+  .audio-vol {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .vol-icon { font-size: 0.8rem; color: var(--silver); }
+
+  input.vol-slider {
+    -webkit-appearance: none;
+    width: 80px;
+    height: 2px;
+    background: var(--gray-mid);
+    outline: none;
+  }
+
+  input.vol-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px; height: 12px;
+    background: var(--silver);
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    padding: 20px 40px 100px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .footer-text {
+    font-size: 0.6rem;
+    color: var(--gray-light);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .footer-text strong { color: var(--silver); }
+
+  /* ICON UPLOAD HIDDEN */
+  #iconInput { display: none; }
+
+  /* ENTER ANIMATION */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.6s forwards;
+  }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-in:nth-child(1) { animation-delay: 0.1s; }
+  .fade-in:nth-child(2) { animation-delay: 0.2s; }
+  .fade-in:nth-child(3) { animation-delay: 0.3s; }
+  .fade-in:nth-child(4) { animation-delay: 0.4s; }
+
+  /* RESPONSIVE */
+  @media (max-width: 640px) {
+    header { padding: 16px 20px; }
+    .hero { padding: 130px 20px 60px; }
+    .builder { padding: 40px 20px 80px; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .icon-section { grid-template-columns: 1fr; }
+    .settings-grid { grid-template-columns: 1fr; }
+    .audio-bar { padding: 12px 20px; }
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--gray-mid);
+    border: 1px solid var(--border);
+    color: var(--white);
+    padding: 12px 24px;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    z-index: 999;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    Builder APK
+  </div>
+  <div class="badge">by Zam Coder</div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-tag fade-in">Zam Coder Tools</div>
+  <h1 class="fade-in">Build Your<br><span>Android</span><br>App.</h1>
+  <p class="hero-sub fade-in">Isi form di bawah, klik build — file APK siap didownload. Gak perlu coding, gak perlu ribet.</p>
+</section>
+
+<div class="divider"></div>
+
+<!-- MAIN BUILDER -->
+<section class="builder">
+
+  <!-- APP INFO -->
+  <div class="section-label">01 — Informasi Aplikasi</div>
+  <div class="grid-2">
+    <div class="field fade-in">
+      <label>Nama Aplikasi</label>
+      <input type="text" id="appName" placeholder="e.g. MyApp">
+    </div>
+    <div class="field fade-in">
+      <label>Package Name</label>
+      <input type="text" id="packageName" placeholder="e.g. com.zam.myapp">
+    </div>
+  </div>
+
+  <!-- SOURCE -->
+  <div class="section-label">02 — Sumber Konten</div>
+  <div class="source-toggle">
+    <button class="toggle-btn active" onclick="switchSource('url')">🔗 URL WebView</button>
+    <button class="toggle-btn" onclick="switchSource('html')">📄 File HTML</button>
+  </div>
+
+  <div class="source-panel active" id="panel-url">
+    <div class="field">
+      <label>URL Website Target</label>
+      <input type="url" id="webviewUrl" placeholder="https://yoursite.com">
+    </div>
+  </div>
+
+  <div class="source-panel" id="panel-html">
+    <div class="file-drop" onclick="document.getElementById('htmlFile').click()">
+      <input type="file" id="htmlFile" accept=".html,.htm" onchange="handleHtmlFile(this)">
+      <span class="file-icon">📂</span>
+      <div class="file-drop-text">
+        Klik atau drag file HTML di sini
+        <span>Format: .html, .htm — Max 5MB</span>
+      </div>
+      <div class="file-name" id="htmlFileName"></div>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 32px;"></div>
+
+  <!-- ICON -->
+  <div class="section-label">03 — Icon Aplikasi</div>
+  <div class="icon-section">
+    <div>
+      <div class="icon-preview-box" id="iconBox">
+        <img id="iconPreview" src="" alt="">
+        <div class="icon-placeholder" id="iconPlaceholder">NO<br>ICON</div>
+      </div>
+    </div>
+    <div class="icon-controls">
+      <div class="field">
+        <label>Upload Icon</label>
+        <button class="btn-secondary" onclick="document.getElementById('iconInput').click()">
+          ↑ Pilih Gambar
+        </button>
+        <input type="file" id="iconInput" accept="image/*" onchange="handleIcon(this)">
+      </div>
+
+      <div class="field">
+        <label>Bentuk Icon</label>
+        <div class="shape-toggle">
+          <button class="shape-btn active" id="shapeSquare" onclick="setShape('square')" title="Kotak">
+            <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20"/></svg>
+          </button>
+          <button class="shape-btn" id="shapeCircle" onclick="setShape('circle')" title="Bulat">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="zoom-wrap">
+        <label>Zoom: <span class="zoom-val" id="zoomVal">100%</span></label>
+        <input type="range" min="50" max="200" value="100" oninput="setZoom(this.value)">
+      </div>
+
+      <button class="btn-secondary" id="cropBtn" onclick="openCrop()" style="display:none">
+        ✂ Buka Crop Edit
+      </button>
+    </div>
+  </div>
+
+  <!-- SPLASH SCREEN -->
+  <div class="section-label">04 — Splash Screen</div>
+  <div class="grid-1">
+    <div class="field">
+      <label>Warna Background Splash</label>
+      <div class="splash-row">
+        <div class="splash-preview" id="splashPreview" style="background:#080808;"></div>
+        <span class="splash-hex" id="splashHex">#080808</span>
+        <div class="color-trigger">
+          <input type="color" id="splashColor" value="#080808" oninput="updateSplash(this.value)">
+          <div class="color-trigger-icon">🎨</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- APK SETTINGS -->
+  <div class="section-label">05 — Pengaturan APK</div>
+  <div class="settings-panel">
+    <div class="settings-grid">
+      <div class="settings-item">
+        <span class="settings-item-label">Orientasi Portrait</span>
+        <div class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="settings-item">
+        <span class="settings-item-label">Fullscreen Mode</span>
+        <div class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="settings-item">
+        <span class="settings-item-label">Izin Internet</span>
+        <div class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="settings-item">
+        <span class="settings-item-label">Izin Kamera</span>
+        <div class="toggle-switch" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="settings-item">
+        <span class="settings-item-label">Izin Lokasi</span>
+        <div class="toggle-switch" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="settings-item">
+        <span class="settings-item-label">Izin Storage</span>
+        <div class="toggle-switch" onclick="this.classList.toggle('on')"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUILD BUTTON -->
+  <button class="build-btn" onclick="buildApk()">
+    ⚡ Generate &amp; Download APK
+  </button>
+
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="progress-text" id="progressText">Menyiapkan file...</div>
+  </div>
+
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-text">© 2025 <strong>Zam Coder</strong> — Builder APK Tool</div>
+</footer>
+
+<!-- AUDIO BAR -->
+<div class="audio-bar">
+  <div class="audio-icon" id="audioBtn" onclick="toggleAudio()">
+    <svg viewBox="0 0 24 24" id="audioIcon"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+  </div>
+  <div class="audio-wave" id="audioWave">
+    <div class="wave-bar"></div>
+    <div class="wave-bar"></div>
+    <div class="wave-bar"></div>
+    <div class="wave-bar"></div>
+    <div class="wave-bar"></div>
+  </div>
+  <div class="audio-info">
+    <div class="audio-title">ssstik.io — Zam Coder BGM</div>
+    <div class="audio-sub">Auto-looping</div>
+  </div>
+  <div class="audio-vol">
+    <span class="vol-icon">🔊</span>
+    <input type="range" class="vol-slider" min="0" max="100" value="72" oninput="setVol(this.value)">
+  </div>
+</div>
+
+<!-- CROP MODAL -->
+<div class="modal-overlay" id="cropModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Crop Icon</div>
+      <button class="modal-close" onclick="closeCrop()">✕</button>
+    </div>
+    <div class="crop-canvas-wrap">
+      <canvas id="cropCanvas"></canvas>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeCrop()">Batal</button>
+      <button class="btn-primary" onclick="applyCrop()">Terapkan Crop</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- AUDIO ELEMENT -->
+<audio id="bgAudio" loop>
+  <source src="https://pdftolink.io/file/r2_dXNlcnMvZ3Vlc3QvNTUxZDQ0NjktNWEyOS00MDcyLTgzNjEtZTY2MDhhMjhlYzNlLm1wMw" type="audio/mpeg">
+</audio>
+
+<script>
+  // ── AUDIO ──
+  const audio = document.getElementById('bgAudio');
+  const audioIcon = document.getElementById('audioIcon');
+  const audioWave = document.getElementById('audioWave');
+
+  audio.volume = 0.72;
+
+  let started = false;
+  function tryPlay() {
+    if (!started) {
+      audio.play().then(() => { started = true; }).catch(() => {});
+    }
+  }
+
+  document.addEventListener('click', tryPlay, { once: true });
+  document.addEventListener('keydown', tryPlay, { once: true });
+
+  audio.play().then(() => { started = true; }).catch(() => {});
+
+  function toggleAudio() {
+    if (audio.paused) {
+      audio.play();
+      audioIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+      audioWave.style.opacity = '1';
+    } else {
+      audio.pause();
+      audioIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+      audioWave.style.opacity = '0.3';
+    }
+  }
+
+  function setVol(v) {
+    audio.volume = v / 100;
+  }
+
+  // ── SOURCE TOGGLE ──
+  function switchSource(type) {
+    document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.source-panel').forEach(p => p.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('panel-' + type).classList.add('active');
+  }
+
+  // ── HTML FILE ──
+  function handleHtmlFile(input) {
+    if (input.files[0]) {
+      const fn = document.getElementById('htmlFileName');
+      fn.textContent = '✓ ' + input.files[0].name;
+      fn.style.display = 'block';
+    }
+  }
+
+  // ── ICON ──
+  let iconDataUrl = null;
+  let iconShape = 'square';
+  let iconZoom = 100;
+  let cropOffsetX = 0, cropOffsetY = 0;
+
+  function handleIcon(input) {
+    if (!input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      iconDataUrl = e.target.result;
+      updateIconPreview();
+      document.getElementById('cropBtn').style.display = 'inline-flex';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+
+  function updateIconPreview() {
+    if (!iconDataUrl) return;
+    const img = document.getElementById('iconPreview');
+    const ph = document.getElementById('iconPlaceholder');
+    img.src = iconDataUrl;
+    img.style.display = 'block';
+    img.style.transform = `scale(${iconZoom / 100})`;
+    img.style.borderRadius = iconShape === 'circle' ? '50%' : '0';
+    ph.style.display = 'none';
+  }
+
+  function setShape(s) {
+    iconShape = s;
+    document.getElementById('shapeSquare').classList.toggle('active', s === 'square');
+    document.getElementById('shapeCircle').classList.toggle('active', s === 'circle');
+    updateIconPreview();
+  }
+
+  function setZoom(v) {
+    iconZoom = v;
+    document.getElementById('zoomVal').textContent = v + '%';
+    updateIconPreview();
+  }
+
+  // ── CROP ──
+  let cropDragging = false, cropStartX, cropStartY;
+
+  function openCrop() {
+    if (!iconDataUrl) return;
+    document.getElementById('cropModal').classList.add('open');
+    renderCropCanvas();
+  }
+
+  function closeCrop() {
+    document.getElementById('cropModal').classList.remove('open');
+  }
+
+  function renderCropCanvas() {
+    const canvas = document.getElementById('cropCanvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.onload = () => {
+      const size = 280;
+      canvas.width = size;
+      canvas.height = size;
+      ctx.clearRect(0, 0, size, size);
+
+      if (iconShape === 'circle') {
+        ctx.beginPath();
+        ctx.arc(size/2, size/2, size/2, 0, Math.PI*2);
+        ctx.clip();
+      }
+
+      const scale = iconZoom / 100;
+      const sw = size * scale;
+      const sh = size * scale;
+      const sx = (size - sw) / 2 + cropOffsetX;
+      const sy = (size - sh) / 2 + cropOffsetY;
+      ctx.drawImage(img, sx, sy, sw, sh);
+
+      ctx.strokeStyle = 'rgba(192,192,192,0.3)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(size/4, size/4, size/2, size/2);
+    };
+    img.src = iconDataUrl;
+  }
+
+  function applyCrop() {
+    const canvas = document.getElementById('cropCanvas');
+    iconDataUrl = canvas.toDataURL('image/png');
+    updateIconPreview();
+    closeCrop();
+    showToast('Icon berhasil di-crop!');
+  }
+
+  const cropCanvas = document.getElementById('cropCanvas');
+  cropCanvas.addEventListener('mousedown', e => {
+    cropDragging = true;
+    cropStartX = e.offsetX - cropOffsetX;
+    cropStartY = e.offsetY - cropOffsetY;
+  });
+  cropCanvas.addEventListener('mousemove', e => {
+    if (!cropDragging) return;
+    cropOffsetX = e.offsetX - cropStartX;
+    cropOffsetY = e.offsetY - cropStartY;
+    renderCropCanvas();
+  });
+  cropCanvas.addEventListener('mouseup', () => cropDragging = false);
+
+  // ── SPLASH ──
+  function updateSplash(v) {
+    document.getElementById('splashPreview').style.background = v;
+    document.getElementById('splashHex').textContent = v.toUpperCase();
+  }
+
+  // ── BUILD APK ──
+  function buildApk() {
+    const appName = document.getElementById('appName').value.trim();
+    const packageName = document.getElementById('packageName').value.trim();
+    const isUrl = document.getElementById('panel-url').classList.contains('active');
+    const urlVal = document.getElementById('webviewUrl').value.trim();
+    const htmlFile = document.getElementById('htmlFile').files[0];
+
+    if (!appName) { showToast('⚠ Isi Nama Aplikasi dulu!'); return; }
+    if (!packageName) { showToast('⚠ Isi Package Name dulu!'); return; }
+    if (isUrl && !urlVal) { showToast('⚠ Isi URL WebView dulu!'); return; }
+    if (!isUrl && !htmlFile) { showToast('⚠ Upload File HTML dulu!'); return; }
+
+    const pw = document.getElementById('progressWrap');
+    const pf = document.getElementById('progressFill');
+    const pt = document.getElementById('progressText');
+
+    pw.style.display = 'block';
+
+    const steps = [
+      [10, 'Memvalidasi konfigurasi...'],
+      [30, 'Menyiapkan manifest...'],
+      [55, 'Mengkompilasi resources...'],
+      [75, 'Menerapkan icon & splash...'],
+      [90, 'Signing APK...'],
+      [100, 'APK siap didownload!']
+    ];
+
+    let i = 0;
+    const run = () => {
+      if (i >= steps.length) {
+        setTimeout(() => generateDownload(appName, packageName, isUrl, urlVal, htmlFile), 300);
+        return;
+      }
+      pf.style.width = steps[i][0] + '%';
+      pt.textContent = steps[i][1];
+      i++;
+      setTimeout(run, 600);
+    };
+    run();
+  }
+
+  async function generateDownload(appName, packageName, isUrl, urlVal, htmlFile) {
+    const GITHUB_TOKEN = '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';
+    const REPO = 'CrNazamOfficial/apk-builder';
+    const splashColor = document.getElementById('splashColor').value;
+
+    let htmlContent = '';
+    if (!isUrl && htmlFile) {
+      htmlContent = await htmlFile.text();
+      htmlContent = htmlContent.replace(/`/g, '\\`').replace(/\n/g, '\\n');
+    }
+
+    const payload = {
+      ref: 'main',
+      inputs: {
+        app_name: appName,
+        package_name: packageName,
+        source_type: isUrl ? 'url' : 'html',
+        webview_url: isUrl ? urlVal : '',
+        html_content: htmlContent,
+        splash_color: splashColor
+      }
+    };
+
+    try {
+      const res = await fetch(`https://api.github.com/repos/${REPO}/actions/workflows/build.yml/dispatches`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${GITHUB_TOKEN}`,
+          'Accept': 'application/vnd.github+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.status === 204) {
+        document.getElementById('progressText').textContent = '✓ Build dimulai! Cek Actions di GitHub repo lo.';
+        showToast('✓ Build berhasil di-trigger! Buka GitHub Actions untuk download APK.');
+        setTimeout(() => {
+          window.open(`https://github.com/${REPO}/actions`, '_blank');
+        }, 2000);
+      } else {
+        const err = await res.json();
+        showToast('⚠ Gagal trigger: ' + (err.message || 'Unknown error'));
+      }
+    } catch (e) {
+      showToast('⚠ Error: ' + e.message);
+    }
+  }
+
+  // ── TOAST ──
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+</script>
+</body>
+  </html>
